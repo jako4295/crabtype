@@ -1,7 +1,11 @@
 mod mvp;
 
 fn main() {
-    let _ = mvp::tui::init();
+    let terminal_result = mvp::tui::init();
+    match terminal_result {
+        Ok(terminal) => mvp::app::App::default().run(&mut terminal),
+        Err(err) => println!("{:?}", err),
+    }
     let res = mvp::tui::restore();
     match res {
         Ok(_) => {}
@@ -15,6 +19,6 @@ fn main() {
 //     docs_example::errors::install_hooks()?;
 //     let mut terminal = docs_example::tui::init()?;
 //     docs_example::app::App::default().run(&mut terminal)?;
-//     docs_example::tui::restore()?;
+//     docs_example::tui::restore()?;s
 //     Ok(())
 // }
