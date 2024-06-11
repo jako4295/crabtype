@@ -1,15 +1,16 @@
 use color_eyre::Result;
 
-mod app;
-mod errors;
-mod tui;
+mod docs_example;
+// mod app;
+// mod errors;
+// mod tui;
 
-type App = app::App;
+type App = docs_example::app::App;
 
 fn main() -> Result<()> {
-    errors::install_hooks()?;
-    let mut terminal = tui::init()?;
+    docs_example::errors::install_hooks()?;
+    let mut terminal = docs_example::tui::init()?;
     App::default().run(&mut terminal)?;
-    tui::restore()?;
+    docs_example::tui::restore()?;
     Ok(())
 }

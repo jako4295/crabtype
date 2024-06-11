@@ -2,7 +2,7 @@ use std::panic;
 
 use color_eyre::{config::HookBuilder, eyre};
 
-use crate::tui;
+use crate::docs_example::tui;
 
 /// This replaces the standard color_eyre panic and error hooks with hooks that
 /// restore the terminal before printing the panic or error.

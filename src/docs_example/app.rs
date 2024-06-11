@@ -1,4 +1,4 @@
-use crate::tui;
+use crate::docs_example::tui;
 
 use color_eyre::{
     eyre::{bail, WrapErr},
@@ -62,9 +62,6 @@ impl App {
 
     fn increment_counter(&mut self) -> Result<()> {
         self.counter += 1;
-        if self.counter > 2 {
-            bail!("counter overflow");
-        }
         Ok(())
     }
 }
