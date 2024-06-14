@@ -2,7 +2,7 @@ name: Rust
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "ahll19-patch-1"]
   pull_request:
     branches: [ "main" ]
 
