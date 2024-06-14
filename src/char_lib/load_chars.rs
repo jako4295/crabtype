@@ -3,7 +3,7 @@ use rand::seq::SliceRandom;
 use std::fs::read_to_string;
 use std::str;
 
-fn load_files_to_vec(dicts: Dict<bool>) -> Vec<char> {
+pub fn load_files_to_vec(dicts: Dict<bool>) -> Vec<char> {
     let mut char_vec: Vec<char> = vec![];
     for i in dicts {
         if i.val {
@@ -19,7 +19,7 @@ fn load_files_to_vec(dicts: Dict<bool>) -> Vec<char> {
     char_vec
 }
 
-fn chose_random(char_vec: Vec<char>) -> char {
+pub fn chose_random(char_vec: Vec<char>) -> char {
     let output_char: &char = char_vec.choose(&mut rand::thread_rng()).unwrap();
     output_char.to_owned()
 }
