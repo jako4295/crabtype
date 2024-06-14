@@ -10,7 +10,7 @@ use ratatui::{
 
 #[derive(Debug, Default)]
 pub struct App {
-    counter: u8,
+    current_char: char,
     exit: bool,
 }
 
@@ -42,9 +42,8 @@ impl App {
 
     fn handle_key_event(&mut self, key_event: KeyEvent) {
         match key_event.code {
-            KeyCode::Char('q') => self.exit(),
-            KeyCode::Left => self.decrement_counter(),
-            KeyCode::Right => self.increment_counter(),
+            KeyCode::Enter => self.exit(),
+            KeyCode::Char(code) => self.display_pressed_char(code),
             _ => {}
         }
     }
@@ -53,39 +52,35 @@ impl App {
         self.exit = true;
     }
 
-    fn increment_counter(&mut self) {
-        self.counter += 1;
-    }
-
-    fn decrement_counter(&mut self) {
-        self.counter -= 1;
+    fn display_pressed_char(&mut self, character: char) {
+        self.current_char = character;
     }
 }
 
 impl Widget for &App {
     fn render(self, area: Rect, buf: &mut Buffer) {
-        let title = Title::from(" Counter App Tutorial ".bold());
-        let instructions = Title::from(Line::from(vec![
-            " Decrement ".into(),
-            "<Left>".blue().bold(),
-            " Increment ".into(),
-            "<Right>".blue().bold(),
-            " Quit ".into(),
-            "<Q> ".blue().bold(),
-        ]));
+        let title = Title::from(" CrabType ".bold());
+        // let instructions = Title::from(Line::from(vec![
+        //     " Decrement ".into(),
+        //     "<Left>".blue().bold(),
+        //     " Increment ".into(),
+        //     "<Right>".blue().bold(),
+        //     " Quit ".into(),
+        //     "<Q> ".blue().bold(),
+        // ]));
         let block = Block::default()
             .title(title.alignment(Alignment::Center))
-            .title(
-                instructions
-                    .alignment(Alignment::Center)
-                    .position(Position::Bottom),
-            )
+            // .title(
+            //     instructions
+            //         .alignment(Alignment::Center)
+            //         .position(Position::Bottom),
+            // )
             .borders(Borders::ALL)
             .border_set(border::THICK);
 
         let counter_text = Text::from(vec![Line::from(vec![
             "Value: ".into(),
-            self.counter.to_string().yellow(),
+            self.current_char.to_string().yellow(),
         ])]);
 
         Paragraph::new(counter_text)
