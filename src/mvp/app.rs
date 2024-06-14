@@ -42,7 +42,7 @@ impl App {
 
     fn handle_key_event(&mut self, key_event: KeyEvent) {
         match key_event.code {
-            KeyCode::Enter => self.exit(),
+            KeyCode::Char('q') => self.exit(),
             KeyCode::Char(code) => self.display_pressed_char(code),
             _ => {}
         }
@@ -59,33 +59,43 @@ impl App {
 
 impl Widget for &App {
     fn render(self, area: Rect, buf: &mut Buffer) {
-        let title = Title::from(" CrabType ".bold());
-        // let instructions = Title::from(Line::from(vec![
-        //     " Decrement ".into(),
-        //     "<Left>".blue().bold(),
-        //     " Increment ".into(),
-        //     "<Right>".blue().bold(),
-        //     " Quit ".into(),
-        //     "<Q> ".blue().bold(),
-        // ]));
         let block = Block::default()
-            .title(title.alignment(Alignment::Center))
-            // .title(
-            //     instructions
-            //         .alignment(Alignment::Center)
-            //         .position(Position::Bottom),
-            // )
             .borders(Borders::ALL)
+            .style(
+                Style::default()
+                    .fg(Color::Blue)
+                    .bg(Color::Black)
+                    .add_modifier(Modifier::ITALIC | Modifier::BOLD),
+            )
             .border_set(border::THICK);
 
-        let counter_text = Text::from(vec![Line::from(vec![
-            "Value: ".into(),
-            self.current_char.to_string().yellow(),
-        ])]);
+        let crabtype: String = {
+            "
+                                                                       
+                                                                       
+       ████████                 ████████████████                   
+      ████████                       ██████████                    
+     ████    ███████████████████████     █████████████ 
+    ████     ██ █ ██ █ ██ ████████ ████      
+   ████     ██████ ██████████████████ ██████████████   
+  ██████████   ██ █ ██ ██████  ██    ███        
+  ██████████ ██████ ██████████████  ██   █████████    
+                                                                       
+                                                                       
+"
+            .to_string()
+        };
 
-        Paragraph::new(counter_text)
-            .centered()
-            .block(block)
-            .render(area, buf);
+        let menu_options: String = {
+            "
+    [b]egin
+    [s]ettings
+    [q]uit
+        "
+            .to_string()
+        };
+        let comb_str = crabtype + &menu_options;
+
+        Paragraph::new(comb_str).block(block).render(area, buf);
     }
 }
