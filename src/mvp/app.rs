@@ -1,4 +1,5 @@
 use crate::mvp::tui;
+use crate::char_lib;
 use std::io;
 
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
@@ -10,7 +11,8 @@ use ratatui::{
 
 #[derive(Debug, Default)]
 pub struct App {
-    current_char: char,
+    random_char: char,
+    pressed_char: char,
     exit: bool,
 }
 
@@ -43,7 +45,7 @@ impl App {
     fn handle_key_event(&mut self, key_event: KeyEvent) {
         match key_event.code {
             KeyCode::Enter => self.exit(),
-            KeyCode::Char(code) => self.display_pressed_char(code),
+            KeyCode::Char(code) => self.compare_pressed_char(code),
             _ => {}
         }
     }
@@ -52,8 +54,14 @@ impl App {
         self.exit = true;
     }
 
-    fn display_pressed_char(&mut self, character: char) {
-        self.current_char = character;
+    fn compare_pressed_char(&mut self, character: char) {
+        // TODO compare pressed_char to random_char if correct
+        // update the random char
+        self.pressed_char = character;
+    }
+
+    fn update_random_char() {
+        // TODO create function to update the random_char
     }
 }
 
@@ -80,7 +88,7 @@ impl Widget for &App {
 
         let counter_text = Text::from(vec![Line::from(vec![
             "Value: ".into(),
-            self.current_char.to_string().yellow(),
+            self.random_char.to_string().yellow(),
         ])]);
 
         Paragraph::new(counter_text)
