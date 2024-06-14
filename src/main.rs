@@ -1,4 +1,5 @@
 mod mvp;
+mod char_lib;
 
 fn main() -> Result<(), std::io::Error> {
     let mut terminal = mvp::tui::init()?;

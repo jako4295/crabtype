@@ -24,19 +24,19 @@ pub fn chose_random(char_vec: Vec<char>) -> char {
     output_char.to_owned()
 }
 
-// fn main() {
-//     let mut dict: Dict<bool> = Dict::<bool>::new();
-//     dict.add("letters".to_string(), true);
-//     dict.add("cap_letters".to_string(), true);
-//     dict.add("numbers".to_string(), true);
-//     let char_vec: Vec<char> = load_files_to_vec(dict);
-//     println!(
-//         "{:?}",
-//         char_vec
-//             .iter()
-//             .map(|x| x.to_string() + " ")
-//             .collect::<String>()
-//     );
-//     let rand = chose_random(char_vec);
-//     println!("{rand}");
-// }
+fn main() {
+    let mut dict: Dict<bool> = Dict::<bool>::new();
+    dict.add("letters".to_string(), true);
+    dict.add("cap_letters".to_string(), true);
+    dict.add("numbers".to_string(), true);
+    let char_vec: Vec<char> = load_files_to_vec(dict);
+    println!(
+        "{:?}",
+        char_vec
+            .iter()
+            .map(|x| x.to_string() + " ")
+            .collect::<String>()
+    );
+    let rand = chose_random(char_vec);
+    println!("{rand}");
+}
