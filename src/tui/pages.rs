@@ -1,3 +1,4 @@
+use core::panic;
 use std::io;
 
 use crate::tui::tui_tools;
@@ -41,13 +42,37 @@ impl<'a> App<'a> {
     }
 
     fn handle_key_event(&mut self, key_event: KeyEvent) {
-        match key_event.code {
-            KeyCode::Char('q') => self.exit(),
-            KeyCode::Char('s') => {
-                self.state = "settings";
+        // options for the different pages:
+        // Menu:
+        if self.state == "menu" {
+            match key_event.code {
+                KeyCode::Char('q') => self.exit(),
+                KeyCode::Char('s') => {
+                    self.state = "settings";
+                }
+                _ => {}
             }
-            KeyCode::Char(code) => self.display_pressed_char(code),
-            _ => {}
+
+        // Settings:
+        } else if self.state == "settings" {
+            match key_event.code {
+                KeyCode::Esc => {
+                    self.state = "menu";
+                }
+                _ => {}
+            }
+
+        // Game:
+        } else if self.state == "game" {
+            match key_event.code {
+                KeyCode::Esc => {
+                    self.state = "menu";
+                }
+                KeyCode::Char(code) => self.display_pressed_char(code),
+                _ => {}
+            }
+        } else {
+            panic!("Unexpected state");
         }
     }
 
