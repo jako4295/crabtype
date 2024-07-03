@@ -2,6 +2,9 @@ use crate::mvp::tui;
 use crate::char_lib::load_chars;
 use dict::{Dict, DictIface};
 use std::io;
+// use chrono::{Date, DateTime, Local};
+use chrono::{DateTime, Duration, Utc, Local};
+// use std::time::{Duration, Instant};
 
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
 use ratatui::{
@@ -12,10 +15,15 @@ use ratatui::{
 
 #[derive(Debug, Default)]
 pub struct App {
+    time: Duration,
+    start_time: DateTime<Local>,
     random_char: char,
-    pressed_char: char,
+    // pressed_char: char,
     char_vec: Vec<char>,
+    score: u32,
     exit: bool,
+    play: bool,
+
 }
 
 impl App {
@@ -24,11 +32,28 @@ impl App {
         let dict: Dict<bool> = self.get_dict();
         self.char_vec = load_chars::load_files_to_vec(dict);
         self.random_char = load_chars::chose_random(self.char_vec.to_owned());
+        self.score = 0;
+        self.play = true;
+        self.start_time = Local::now();
         while !self.exit {
             terminal.draw(|frame| self.render_frame(frame))?;
             self.handle_events()?;
+            self.get_time();
         }
         Ok(())
+    }
+
+    fn get_time(&mut self){
+        // let time:DateTime<Local> = Local::now();
+        // let time_formatter = time.format("%H:%M:%S");
+        // time_formatter.to_string();
+        // println!("{}", date.format("%Y-%m-%d][%H:%M:%S"));
+
+        // let duration = start.elapsed();
+        // self.time = duration;
+        let time_now = Local::now();
+        self.time = time_now.signed_duration_since(self.start_time)
+
     }
 
     fn get_dict (&self) -> Dict<bool>{
@@ -58,9 +83,17 @@ impl App {
     fn handle_key_event(&mut self, key_event: KeyEvent) {
         match key_event.code {
             KeyCode::Enter => self.exit(),
+            KeyCode::Char(' ') => self.reset(),
             KeyCode::Char(code) => self.compare_pressed_char(code),
             _ => {}
         }
+    }
+
+    fn reset(&mut self){
+        self.start_time = Local::now();
+        self.score = 0;
+        self.play = true;
+
     }
 
     fn exit(&mut self) {
@@ -68,10 +101,12 @@ impl App {
     }
 
     fn compare_pressed_char(&mut self, character: char) {
-        // TODO compare pressed_char to random_char if correct
-        // update the random char
+        if self.time >= Duration::seconds(30) {
+            self.play = false
+        }
         if self.random_char == character {
             self.random_char = load_chars::chose_random(self.char_vec.to_owned());
+            self.score = self.score + 1;
         }
         // self.pressed_char = character;
     }
@@ -99,14 +134,43 @@ impl Widget for &App {
             .borders(Borders::ALL)
             .border_set(border::THICK);
 
-        let counter_text = Text::from(vec![Line::from(vec![
-            "Value: ".into(),
-            self.random_char.to_string().yellow(),
-        ])]);
+        let text = vec![
+            text::Line::from(vec![
+                Span::from("Timer: "),
+                Span::from(self.time.num_seconds().to_string()), 
+                Span::from("sec / 30 sec"),
+            ]),
+            text::Line::from(" "),
+            text::Line::from(vec![
+                Span::from("Value: "),
+                Span::from(self.random_char.to_string().yellow())
+            ]),
+        ];
+        let text2 = vec![
+            text::Line::from(vec![
+                Span::from("You score is: "),
+            ]),
+            text::Line::from(" "),
+            text::Line::from(vec![
+                Span::from(self.score.to_string()),
+            ]),
+        ];
+        if self.play {
+            Paragraph::new(text)
+                .centered()
+                .block(block)
+                .render(area, buf);
+        }
+        else {
+            Paragraph::new(text2)
+                .centered()
+                .block(block)
+                .render(area, buf);
 
-        Paragraph::new(counter_text)
-            .centered()
-            .block(block)
-            .render(area, buf);
+        }
+
+
+
+
     }
 }
