@@ -23,6 +23,14 @@ pub fn load_settings() -> settings_struct::Settings {
     settings_struct::Settings::default()
 }
 
+fn _history() -> Vec<char> {
+    todo!();
+}
+
+fn _future() -> Vec<char> {
+    todo!();
+}
+
 #[derive(Debug)]
 pub struct GameLogic {
     pub time: Duration,
