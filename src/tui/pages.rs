@@ -2,16 +2,16 @@ use core::panic;
 use std::io;
 
 use crate::tui::tui_tools;
-use crate::{menu::menu_page, settings::settings_page};
+use crate::{game::game_page, menu::menu_page, settings::settings_page};
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
 use ratatui::prelude::*;
 
 #[derive(Debug, Default)]
 pub struct App<'a> {
-    current_char: char,
     exit: bool,
     // app state:
     state: &'a str,
+    gamestruct: game_page::GameLogic,
 }
 
 impl<'a> App<'a> {
@@ -50,6 +50,9 @@ impl<'a> App<'a> {
                 KeyCode::Char('s') => {
                     self.state = "settings";
                 }
+                KeyCode::Char('b') => {
+                    self.state = "game";
+                }
                 _ => {}
             }
 
@@ -64,11 +67,13 @@ impl<'a> App<'a> {
 
         // Game:
         } else if self.state == "game" {
+            self.gamestruct.get_time();
             match key_event.code {
                 KeyCode::Esc => {
                     self.state = "menu";
                 }
-                KeyCode::Char(code) => self.display_pressed_char(code),
+                KeyCode::Char(' ') => self.gamestruct.reset(),
+                KeyCode::Char(code) => self.gamestruct.compare_pressed_char(code),
                 _ => {}
             }
         } else {
@@ -79,10 +84,6 @@ impl<'a> App<'a> {
     fn exit(&mut self) {
         self.exit = true;
     }
-
-    fn display_pressed_char(&mut self, character: char) {
-        self.current_char = character;
-    }
 }
 
 impl Widget for &App<'_> {
@@ -90,6 +91,9 @@ impl Widget for &App<'_> {
         match self.state {
             "menu" => menu_page::render(area, buf),
             "settings" => settings_page::render(area, buf),
+            "game" => {
+                self.gamestruct.render(area, buf);
+            }
             _ => {}
         }
     }

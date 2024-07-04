@@ -1,4 +1,5 @@
 mod char_lib;
+mod game;
 mod menu;
 mod settings;
 mod tui;
