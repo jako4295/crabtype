@@ -1,10 +1,12 @@
-mod mvp;
 mod char_lib;
+mod menu;
+mod settings;
+mod tui;
 
 fn main() -> Result<(), std::io::Error> {
-    let mut terminal = mvp::tui::init()?;
-    mvp::app::App::default().run(&mut terminal)?;
-    mvp::tui::restore()
+    let mut terminal = tui::tui_tools::init()?;
+    tui::pages::App::default().run(&mut terminal)?;
+    tui::tui_tools::restore()
 }
 
 // mod docs_example;
