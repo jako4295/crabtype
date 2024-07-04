@@ -25,22 +25,31 @@ pub struct GameLogic {
     pub score: u32,
     pub play: bool,
     pub current_char: Option<char>,
+    pub char_hist: [char; 3],
+    pub char_future: [char; 3],
+
 }
 
 impl Default for GameLogic {
     fn default() -> GameLogic {
         let dict: Dict<bool> = get_dict();
         let start_t = Local::now();
-        let load_char = load_chars::load_files_to_vec(dict);
+        let load_char: Vec<char> = load_chars::load_files_to_vec(dict);
 
         GameLogic {
             time: Local::now().signed_duration_since(start_t),
             start_time: start_t,
             random_char: load_chars::chose_random(load_char.to_owned()),
-            char_vec: load_char,
+            char_vec: load_char.to_owned(),
             score: 0,
             play: true,
             current_char: None,
+            char_hist: [' ', ' ', ' '],
+            char_future: [
+                load_chars::chose_random(load_char.to_owned()), 
+                load_chars::chose_random(load_char.to_owned()), 
+                load_chars::chose_random(load_char.to_owned())
+            ],
         }
     }
 }
@@ -54,13 +63,20 @@ impl GameLogic {
         self.start_time = Local::now();
         self.score = 0;
         self.play = true;
+        self.char_hist = [' ', ' ', ' ']
     }
     pub fn compare_pressed_char(&mut self, character: char) {
+        self.char_hist[0] = self.char_hist[1];
+        self.char_hist[1] = self.char_hist[2];
+        self.char_hist[2] = character;
         if self.time >= Duration::seconds(30) {
             self.play = false
         }
         if self.random_char == character {
-            self.random_char = load_chars::chose_random(self.char_vec.to_owned());
+            self.random_char = self.char_future[0];
+            self.char_future[0] = self.char_future[1];
+            self.char_future[1] = self.char_future[2];
+            self.char_future[2] = load_chars::chose_random(self.char_vec.to_owned());
             self.score += 1;
         }
     }
@@ -94,8 +110,22 @@ impl GameLogic {
             text::Line::from(" "),
             text::Line::from(vec![
                 Span::from("Value: "),
+                ]),
+            text::Line::from(vec![
+                Span::styled(self.char_hist[0].to_string(), Style::new().fg(Color::Rgb(128, 128, 128))),
+                Span::from(" "),
+                Span::styled(self.char_hist[1].to_string(), Style::new().fg(Color::Rgb(128, 128, 128))),
+                Span::from(" "),
+                Span::styled(self.char_hist[2].to_string(), Style::new().fg(Color::Rgb(128, 128, 128))),
+                Span::from("   "),
                 self.random_char.to_string().yellow(),
-            ]),
+                Span::from("   "),
+                Span::styled(self.char_future[0].to_string(), Style::new().fg(Color::Rgb(128, 128, 128))),
+                Span::from(" "),
+                Span::styled(self.char_future[1].to_string(), Style::new().fg(Color::Rgb(128, 128, 128))),
+                Span::from(" "),
+                Span::styled(self.char_future[2].to_string(), Style::new().fg(Color::Rgb(128, 128, 128))),
+            ])
         ];
         let text2 = vec![
             text::Line::from(vec![Span::from("You score is: ")]),
