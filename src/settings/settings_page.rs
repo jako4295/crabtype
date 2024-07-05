@@ -66,10 +66,15 @@ impl Default for SettingsStateList {
             },
         ];
 
+        let mut _state = ListState::default();
+        if !loaded_items.is_empty() {
+            _state.select(Some(0));
+        }
+
         SettingsStateList {
-            state: ListState::default(),
+            state: _state,
             items: loaded_items,
-            last_selected: Some(0),
+            last_selected: None,
         }
     }
 }
@@ -83,18 +88,9 @@ impl SettingsItem {
     }
 
     fn settings_status_to_str(&self) -> String {
-        if matches!(self.status, SettingsStatus::Uint(_)) {
-            let SettingsStatus::Uint(val) = self.status else {
-                todo!()
-            };
-            val.to_string()
-        } else if matches!(self.status, SettingsStatus::Boolean(_)) {
-            let SettingsStatus::Boolean(val) = self.status else {
-                todo!()
-            };
-            boolean_translator(val)
-        } else {
-            panic!("Unexpected status type")
+        match self.status {
+            SettingsStatus::Uint(val) => val.to_string(),
+            SettingsStatus::Boolean(val) => boolean_translator(val),
         }
     }
 }
@@ -157,6 +153,13 @@ impl SettingsStateList {
             None => self.last_selected.unwrap_or(0),
         };
         self.state.select(Some(i));
+    }
+
+    pub fn unselect(&mut self) {
+        let offset = self.state.offset();
+        self.last_selected = self.state.selected();
+        self.state.select(None);
+        *self.state.offset_mut() = offset;
     }
 }
 

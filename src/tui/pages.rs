@@ -63,8 +63,9 @@ impl<'a> App<'a> {
                 KeyCode::Esc => {
                     self.state = "menu";
                 }
-                KeyCode::Char('j') => self.settings_select.next(),
-                KeyCode::Char('k') => self.settings_select.previous(),
+                KeyCode::Char('j') | KeyCode::Down => self.settings_select.next(),
+                KeyCode::Char('k') | KeyCode::Up => self.settings_select.previous(),
+                KeyCode::Char('h') | KeyCode::Left => self.settings_select.unselect(),
                 _ => {}
             }
 
