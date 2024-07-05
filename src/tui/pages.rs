@@ -12,6 +12,7 @@ pub struct App<'a> {
     // app state:
     state: &'a str,
     gamestruct: game_page::GameLogic,
+    settings_select: settings_page::SettingsStateList,
 }
 
 impl<'a> App<'a> {
@@ -62,6 +63,8 @@ impl<'a> App<'a> {
                 KeyCode::Esc => {
                     self.state = "menu";
                 }
+                KeyCode::Char('j') => self.settings_select.next(),
+                KeyCode::Char('k') => self.settings_select.previous(),
                 _ => {}
             }
 
@@ -90,7 +93,10 @@ impl Widget for &App<'_> {
     fn render(self, area: Rect, buf: &mut Buffer) {
         match self.state {
             "menu" => menu_page::render(area, buf),
-            "settings" => settings_page::render(area, buf),
+            "settings" => {
+                let mut states = settings_page::SettingsStateList::default();
+                states.render(area, buf);
+            }
             "game" => {
                 self.gamestruct.render(area, buf);
             }
