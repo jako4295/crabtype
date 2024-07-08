@@ -4,7 +4,7 @@ use ratatui::{
     widgets::{block::*, *},
 };
 
-use crate::game::game_page;
+use super::settings_struct;
 
 #[derive(Debug)]
 pub enum SettingsStatus {
@@ -27,7 +27,7 @@ pub struct SettingsStateList {
 
 impl Default for SettingsStateList {
     fn default() -> Self {
-        let settings = game_page::load_settings();
+        let settings = settings_struct::Settings::read_config().unwrap();
 
         let loaded_items = vec![
             SettingsItem {
@@ -159,6 +159,15 @@ impl SettingsStateList {
         self.state.select(None);
         *self.state.offset_mut() = offset;
     }
+
+    // TODO:
+    //  1. Write save to config method
+    //  2. Write load method
+    //  2. Write toggle change method:
+    //    a. Handle booleans as change by pressing enter
+    //    b. Handles u8 as a pop up where it is possible
+    //       to change the value. If invalid u8 is typed
+    //       then go back to previous state.
 }
 
 fn boolean_translator(state: bool) -> String {

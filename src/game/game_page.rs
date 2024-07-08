@@ -17,11 +17,11 @@ pub fn get_dict() -> Dict<bool> {
     dict
 }
 
-pub fn load_settings() -> settings_struct::Settings {
-    // Load settings from .config/crabtype
+//pub fn load_settings() -> settings_struct::Settings {
+//    // Load settings from .config/crabtype
 
-    settings_struct::Settings::default()
-}
+//    settings_struct::Settings::default()
+//}
 
 fn _history() -> Vec<char> {
     todo!();
@@ -49,7 +49,7 @@ impl Default for GameLogic {
         let dict: Dict<bool> = get_dict();
         let start_t = Local::now();
         let load_char = load_chars::load_files_to_vec(dict);
-        let loaded_settings = load_settings();
+        let loaded_settings = settings_struct::Settings::read_config();
 
         GameLogic {
             time: Local::now().signed_duration_since(start_t),
@@ -60,7 +60,7 @@ impl Default for GameLogic {
             play: true,
             current_char: None,
             history: Vec::new(),
-            settings: loaded_settings,
+            settings: Result::expect(loaded_settings, "Did not find settings"),
         }
     }
 }
