@@ -1,5 +1,3 @@
-use core::panic;
-
 use ratatui::{
     prelude::*,
     symbols::border,
