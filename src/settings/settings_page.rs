@@ -21,9 +21,11 @@ pub struct SettingsItem {
     pub reference_name: String,
 }
 
+impl SettingsItem {}
+
 #[derive(Debug)]
 pub struct SettingsStateList {
-    pub state: ListState,
+    pub state: TableState,
     pub items: Vec<SettingsItem>,
     pub last_selected: Option<usize>,
     pub settings_struct: settings_struct::Settings,
@@ -76,7 +78,7 @@ impl Default for SettingsStateList {
             },
         ];
 
-        let mut _state = ListState::default();
+        let mut _state = TableState::default();
         if !loaded_items.is_empty() {
             _state.select(Some(0));
         }
@@ -91,17 +93,23 @@ impl Default for SettingsStateList {
 }
 
 impl SettingsItem {
-    fn to_list_item(&self) -> ListItem {
-        ListItem::new(Line::from(vec![
-            Span::raw(self.description.to_string()),
-            Span::raw(self.settings_status_to_str().to_string()),
-        ]))
+    fn to_table_row(&self) -> Row {
+        Row::new(vec![
+            Cell::from(self.description.clone()),
+            Cell::from(self.settings_status_to_str()),
+        ])
     }
 
     fn settings_status_to_str(&self) -> String {
         match self.status {
             SettingsStatus::Uint(val) => val.to_string(),
-            SettingsStatus::Boolean(val) => boolean_translator(val),
+            SettingsStatus::Boolean(val) => {
+                if val {
+                    "On".to_string()
+                } else {
+                    "Off".to_string()
+                }
+            }
         }
     }
 }
@@ -114,6 +122,12 @@ impl SettingsStateList {
 
         let block = Block::default()
             .borders(Borders::ALL)
+            .style(
+                Style::default()
+                    .fg(Color::Blue)
+                    .bg(Color::Black)
+                    .add_modifier(Modifier::ITALIC | Modifier::BOLD),
+            )
             .border_set(border::THICK)
             .title(
                 instructions
@@ -121,28 +135,33 @@ impl SettingsStateList {
                     .position(Position::Bottom),
             );
 
-        // let crabtype: String = "settings".to_string();
+        let rows: Vec<Row> = self.items.iter().map(|item| item.to_table_row()).collect();
 
-        let items: Vec<ListItem> = self
-            .items
-            .iter()
-            .enumerate()
-            .map(|(_i, todo_item)| todo_item.to_list_item())
-            .collect();
+        let table = Table::new(
+            rows,
+            [
+                // + 1 is for padding.
+                Constraint::Length(50),
+                Constraint::Min(10),
+                Constraint::Min(10),
+            ],
+        )
+        .header(
+            Row::new(vec!["Description", "Status"])
+                .style(Style::default().add_modifier(Modifier::BOLD)),
+        )
+        .block(block)
+        .widths([Constraint::Percentage(90), Constraint::Percentage(10)])
+        .highlight_style(
+            Style::default()
+                .add_modifier(Modifier::BOLD)
+                .add_modifier(Modifier::REVERSED)
+                .fg(Color::White)
+                .bg(Color::Blue),
+        )
+        .highlight_symbol(">");
 
-        let items = List::new(items)
-            .block(block)
-            .highlight_style(
-                Style::default()
-                    .add_modifier(Modifier::BOLD)
-                    .add_modifier(Modifier::REVERSED)
-                    .fg(Color::White)
-                    .bg(Color::Blue),
-            )
-            .highlight_symbol(">")
-            .highlight_spacing(HighlightSpacing::Always);
-
-        StatefulWidget::render(items, area, buf, &mut self.state);
+        StatefulWidget::render(table, area, buf, &mut self.state);
     }
 
     pub fn next(&mut self) {
@@ -249,13 +268,5 @@ impl SettingsStateList {
             }
         }
         settings
-    }
-}
-
-fn boolean_translator(state: bool) -> String {
-    if state {
-        "On".to_string()
-    } else {
-        "Off".to_string()
     }
 }
