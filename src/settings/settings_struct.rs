@@ -37,7 +37,7 @@ impl Default for Settings {
 }
 
 impl Settings {
-    fn write_config(cfg: &Settings) -> Result<(), confy::ConfyError> {
+    pub fn write_config(cfg: &Settings) -> Result<(), confy::ConfyError> {
         confy::store(APP_NAME, CONFIG_NAME, cfg)
     }
     pub fn read_config() -> Result<Settings, confy::ConfyError> {

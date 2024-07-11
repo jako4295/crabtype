@@ -66,7 +66,12 @@ impl<'a> App<'a> {
                 }
                 KeyCode::Char('j') | KeyCode::Down => self.settings_select.borrow_mut().next(),
                 KeyCode::Char('k') | KeyCode::Up => self.settings_select.borrow_mut().previous(),
-                KeyCode::Char('h') | KeyCode::Left => self.settings_select.borrow_mut().unselect(),
+                KeyCode::Char('h') | KeyCode::Left => {
+                    self.settings_select.borrow_mut().edit_entry(false)
+                }
+                KeyCode::Char('l') | KeyCode::Right => {
+                    self.settings_select.borrow_mut().edit_entry(true)
+                }
                 _ => {}
             }
 
