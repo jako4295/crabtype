@@ -1,4 +1,5 @@
 use core::panic;
+use std::cell::RefCell;
 use std::io;
 
 use crate::tui::tui_tools;
@@ -12,6 +13,7 @@ pub struct App<'a> {
     // app state:
     state: &'a str,
     gamestruct: game_page::GameLogic,
+    settings_select: RefCell<settings_page::SettingsStateList>,
 }
 
 impl<'a> App<'a> {
@@ -62,6 +64,14 @@ impl<'a> App<'a> {
                 KeyCode::Esc => {
                     self.state = "menu";
                 }
+                KeyCode::Char('j') | KeyCode::Down => self.settings_select.borrow_mut().next(),
+                KeyCode::Char('k') | KeyCode::Up => self.settings_select.borrow_mut().previous(),
+                KeyCode::Char('h') | KeyCode::Left => {
+                    self.settings_select.borrow_mut().edit_entry(false)
+                }
+                KeyCode::Char('l') | KeyCode::Right => {
+                    self.settings_select.borrow_mut().edit_entry(true)
+                }
                 _ => {}
             }
 
@@ -90,7 +100,9 @@ impl Widget for &App<'_> {
     fn render(self, area: Rect, buf: &mut Buffer) {
         match self.state {
             "menu" => menu_page::render(area, buf),
-            "settings" => settings_page::render(area, buf),
+            "settings" => {
+                self.settings_select.borrow_mut().render(area, buf);
+            }
             "game" => {
                 self.gamestruct.render(area, buf);
             }
