@@ -1,6 +1,8 @@
 use core::panic;
 use std::cell::RefCell;
 use std::io;
+use std::time::Duration;
+use std::time::Instant;
 
 use crate::tui::tui_tools;
 use crate::{game::game_page, menu::menu_page, settings::settings_page};
@@ -20,9 +22,23 @@ impl<'a> App<'a> {
     /// runs the application's main loop until the user quits
     pub fn run(&mut self, terminal: &mut tui_tools::Tui) -> io::Result<()> {
         self.state = "menu";
+        let tick_rate = Duration::from_millis(100); // Update every second
+        let mut last_tick = Instant::now();
+
         while !self.exit {
-            terminal.draw(|frame| self.render_frame(frame))?;
-            self.handle_events()?;
+            let timeout = tick_rate
+                .checked_sub(last_tick.elapsed())
+                .unwrap_or_else(|| Duration::from_secs(0));
+
+            if crossterm::event::poll(timeout)? {
+                self.handle_events()?;
+            }
+
+            if last_tick.elapsed() >= tick_rate {
+                self.gamestruct.get_time(); // Update the game timer
+                last_tick = Instant::now();
+                terminal.draw(|frame| self.render_frame(frame))?;
+            }
         }
         Ok(())
     }
