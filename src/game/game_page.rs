@@ -106,9 +106,7 @@ impl GameLogic {
         self.play = true;
         self.reset_char_vec();
     }
-    pub fn update_settings(&mut self) {
-        self.settings = settings_struct::Settings::read_config().unwrap();
-    }
+
     pub fn compare_pressed_char(&mut self, character: char) {
         self.char_hist.remove(0);
         self.char_hist.push(character);
