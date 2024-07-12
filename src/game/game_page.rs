@@ -6,8 +6,8 @@ use dict::{Dict, DictIface};
 use ratatui::{
     prelude::*,
     symbols::border,
+    text::Span,
     widgets::{block::*, *},
-    text::Span
 };
 
 pub fn get_dict() -> Dict<bool> {
@@ -33,7 +33,7 @@ fn _future() -> Vec<char> {
 }
 
 #[derive(Debug)]
-pub struct GameLogic{
+pub struct GameLogic {
     pub time: Duration,
     pub start_time: DateTime<Local>,
     pub random_char: char,
@@ -46,6 +46,7 @@ pub struct GameLogic{
     pub char_hist: Vec<char>,
     pub char_future: Vec<char>,
     pub correct: bool,
+    pub settings: settings_struct::Settings,
 }
 
 impl Default for GameLogic {
@@ -58,10 +59,10 @@ impl Default for GameLogic {
         let mut f_vec = vec![];
         let h_amount: i8 = 3;
         let f_amount: i8 = 5;
-        for _ in 0..h_amount{
-            h_vec.push(' ');
+        for _ in 0..h_amount {
+            Vec::push(&mut h_vec, ' ');
         }
-        for _ in 0..f_amount{
+        for _ in 0..f_amount {
             f_vec.push(load_chars::chose_random(load_char.to_owned()));
         }
 
@@ -83,20 +84,20 @@ impl Default for GameLogic {
     }
 }
 
-
 impl GameLogic {
     pub fn get_time(&mut self) {
         let time_now = Local::now();
         self.time = time_now.signed_duration_since(self.start_time);
     }
-    pub fn reset_char_vec(&mut self){
+    pub fn reset_char_vec(&mut self) {
         self.char_future = vec![];
         self.char_hist = vec![];
-        for _ in 0..self.hist_amount{
+        for _ in 0..self.hist_amount {
             self.char_hist.push(' ');
         }
-        for _ in 0..self.future_amount{
-            self.char_future.push(load_chars::chose_random(self.char_vec.to_owned()));
+        for _ in 0..self.future_amount {
+            self.char_future
+                .push(load_chars::chose_random(self.char_vec.to_owned()));
         }
     }
     pub fn reset(&mut self) {
@@ -115,11 +116,11 @@ impl GameLogic {
         if self.random_char == character {
             self.random_char = self.char_future[0];
             self.char_future.remove(0);
-            self.char_future.push(load_chars::chose_random(self.char_vec.to_owned()));
+            self.char_future
+                .push(load_chars::chose_random(self.char_vec.to_owned()));
             self.score += 1;
             self.correct = true;
-        }
-        else {
+        } else {
             self.correct = false;
         }
     }
@@ -145,16 +146,22 @@ impl GameLogic {
 
         let mut letter_line = vec![];
 
-        for i in self.char_hist.to_owned(){
-            letter_line.push(Span::styled(i.to_string(), Style::new().fg(Color::Rgb(128, 128, 128))));
+        for i in self.char_hist.clone() {
+            letter_line.push(Span::styled(
+                i.to_string(),
+                Style::new().fg(Color::Rgb(128, 128, 128)),
+            ));
             letter_line.push(Span::from(" "));
         }
         letter_line.push(Span::from("  "));
         letter_line.push(self.random_char.to_string().yellow());
         letter_line.push(Span::from("  "));
-        for u in self.char_future.to_owned(){
+        for u in self.char_future.clone() {
             letter_line.push(Span::from(" "));
-            letter_line.push(Span::styled(u.to_string(), Style::new().fg(Color::Rgb(128, 128, 128))));
+            letter_line.push(Span::styled(
+                u.to_string(),
+                Style::new().fg(Color::Rgb(128, 128, 128)),
+            ));
         }
 
         let text = vec![
@@ -166,26 +173,23 @@ impl GameLogic {
                 Span::from(" sec"),
             ]),
             text::Line::from(" "),
-            text::Line::from(vec![
-                Span::from("Value: "),
-                ]),
-            text::Line::from(letter_line)
-                // vec![
-                // Span::styled(self.char_hist[0].to_string(), Style::new().fg(Color::Rgb(128, 128, 128))),
-                // Span::from(" "),
-                // Span::styled(self.char_hist[1].to_string(), Style::new().fg(Color::Rgb(128, 128, 128))),
-                // Span::from(" "),
-                // Span::styled(self.char_hist[2].to_string(), Style::new().fg(Color::Rgb(128, 128, 128))),
-                // Span::from("   "),
-                // self.random_char.to_string().yellow(),
-                // Span::from("   "),
-                // Span::styled(self.char_future[0].to_string(), Style::new().fg(Color::Rgb(128, 128, 128))),
-                // Span::from(" "),
-                // Span::styled(self.char_future[1].to_string(), Style::new().fg(Color::Rgb(128, 128, 128))),
-                // Span::from(" "),
-                // Span::styled(self.char_future[2].to_string(), Style::new().fg(Color::Rgb(128, 128, 128))),
+            text::Line::from(vec![Span::from("Value: ")]),
+            text::Line::from(letter_line), // vec![
+                                           // Span::styled(self.char_hist[0].to_string(), Style::new().fg(Color::Rgb(128, 128, 128))),
+                                           // Span::from(" "),
+                                           // Span::styled(self.char_hist[1].to_string(), Style::new().fg(Color::Rgb(128, 128, 128))),
+                                           // Span::from(" "),
+                                           // Span::styled(self.char_hist[2].to_string(), Style::new().fg(Color::Rgb(128, 128, 128))),
+                                           // Span::from("   "),
+                                           // self.random_char.to_string().yellow(),
+                                           // Span::from("   "),
+                                           // Span::styled(self.char_future[0].to_string(), Style::new().fg(Color::Rgb(128, 128, 128))),
+                                           // Span::from(" "),
+                                           // Span::styled(self.char_future[1].to_string(), Style::new().fg(Color::Rgb(128, 128, 128))),
+                                           // Span::from(" "),
+                                           // Span::styled(self.char_future[2].to_string(), Style::new().fg(Color::Rgb(128, 128, 128))),
 
-            // ])
+                                           // ])
         ];
         let text2 = vec![
             text::Line::from(vec![Span::from("You score is: ")]),
@@ -205,3 +209,4 @@ impl GameLogic {
                 .render(area, buf);
         }
     }
+}
