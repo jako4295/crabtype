@@ -41,8 +41,8 @@ pub struct GameLogic {
     pub score: u32,
     pub play: bool,
     pub current_char: Option<char>,
-    pub hist_amount: i8,
-    pub future_amount: i8,
+    pub hist_amount: u8,
+    pub future_amount: u8,
     pub char_hist: Vec<char>,
     pub char_future: Vec<char>,
     pub correct: bool,
@@ -54,11 +54,11 @@ impl Default for GameLogic {
         let dict: Dict<bool> = get_dict();
         let start_t = Local::now();
         let load_char: Vec<char> = load_chars::load_files_to_vec(dict);
-        let loaded_settings = settings_struct::Settings::read_config();
+        let loaded_settings = settings_struct::Settings::read_config().unwrap();
         let mut h_vec = vec![];
         let mut f_vec = vec![];
-        let h_amount: i8 = 3;
-        let f_amount: i8 = 5;
+        let h_amount: u8 = loaded_settings.history_length;
+        let f_amount: u8 = loaded_settings.future_length;
         for _ in 0..h_amount {
             Vec::push(&mut h_vec, ' ');
         }
@@ -79,7 +79,7 @@ impl Default for GameLogic {
             char_hist: h_vec,
             char_future: f_vec,
             correct: true,
-            settings: Result::expect(loaded_settings, "Did not find settings"),
+            settings: loaded_settings,
         }
     }
 }
@@ -105,6 +105,9 @@ impl GameLogic {
         self.score = 0;
         self.play = true;
         self.reset_char_vec();
+    }
+    pub fn update_settings(&mut self) {
+        self.settings = settings_struct::Settings::read_config().unwrap();
     }
     pub fn compare_pressed_char(&mut self, character: char) {
         self.char_hist.remove(0);

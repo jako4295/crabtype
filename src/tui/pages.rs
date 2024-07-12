@@ -70,6 +70,8 @@ impl<'a> App<'a> {
                 }
                 KeyCode::Char('b') => {
                     self.state = "game";
+                    self.gamestruct = game_page::GameLogic::default();
+                    self.gamestruct.reset();
                 }
                 _ => {}
             }
