@@ -155,9 +155,7 @@ impl SettingsStateList {
         .highlight_style(
             Style::default()
                 .add_modifier(Modifier::BOLD)
-                .add_modifier(Modifier::REVERSED)
-                .fg(Color::White)
-                .bg(Color::Blue),
+                .add_modifier(Modifier::REVERSED),
         )
         .highlight_symbol(">");
 
