@@ -1,4 +1,5 @@
 use crate::char_lib::load_chars;
+use crate::settings::settings_struct;
 use chrono::{DateTime, Duration, Local};
 use dict::{Dict, DictIface};
 
@@ -15,6 +16,20 @@ pub fn get_dict() -> Dict<bool> {
     dict.add("cap_letters".to_string(), false);
     dict.add("numbers".to_string(), false);
     dict
+}
+
+//pub fn load_settings() -> settings_struct::Settings {
+//    // Load settings from .config/crabtype
+
+//    settings_struct::Settings::default()
+//}
+
+fn _history() -> Vec<char> {
+    todo!();
+}
+
+fn _future() -> Vec<char> {
+    todo!();
 }
 
 #[derive(Debug)]
@@ -38,6 +53,7 @@ impl Default for GameLogic {
         let dict: Dict<bool> = get_dict();
         let start_t = Local::now();
         let load_char: Vec<char> = load_chars::load_files_to_vec(dict);
+        let loaded_settings = settings_struct::Settings::read_config();
         let mut h_vec = vec![];
         let mut f_vec = vec![];
         let h_amount: i8 = 3;
@@ -62,6 +78,7 @@ impl Default for GameLogic {
             char_hist: h_vec,
             char_future: f_vec,
             correct: true,
+            settings: Result::expect(loaded_settings, "Did not find settings"),
         }
     }
 }
@@ -92,7 +109,7 @@ impl GameLogic {
         self.char_hist.remove(0);
         self.char_hist.push(character);
 
-        if self.time >= Duration::seconds(30) {
+        if self.time >= Duration::seconds(self.settings.total_time_sec.into()) {
             self.play = false
         }
         if self.random_char == character {
@@ -109,22 +126,21 @@ impl GameLogic {
 
     pub fn render(&self, area: Rect, buf: &mut Buffer) {
         let title = Title::from(" CrabType ".bold());
-        // let instructions = Title::from(Line::from(vec![
-        //     " Decrement ".into(),
-        //     "<Left>".blue().bold(),
-        //     " Increment ".into(),
-        //     "<Right>".blue().bold(),
-        //     " Quit ".into(),
-        //     "<Q> ".blue().bold(),
-        // ]));
+        let instructions = Title::from(Line::from(vec![
+            " Exit ".into(),
+            " <Esc> ".yellow().bold(),
+            " Restart ".into(),
+            " <Space> ".yellow().bold(),
+        ]));
         let block = Block::default()
             .title(title.alignment(Alignment::Center))
-            // .title(
-            //     instructions
-            //         .alignment(Alignment::Center)
-            //         .position(Position::Bottom),
-            // )
+            .title(
+                instructions
+                    .alignment(Alignment::Center)
+                    .position(Position::Bottom),
+            )
             .borders(Borders::ALL)
+            .style(Style::default().fg(Color::Yellow).bg(Color::Black))
             .border_set(border::THICK);
 
         let mut letter_line = vec![];
@@ -145,7 +161,9 @@ impl GameLogic {
             text::Line::from(vec![
                 Span::from("Timer: "),
                 Span::from(self.time.num_seconds().to_string()),
-                Span::from("sec / 30 sec"),
+                Span::from("sec / "),
+                Span::from(self.settings.total_time_sec.to_string()),
+                Span::from(" sec"),
             ]),
             text::Line::from(" "),
             text::Line::from(vec![
@@ -178,6 +196,7 @@ impl GameLogic {
             Paragraph::new(text)
                 .centered()
                 .block(block)
+                .fg(Color::White)
                 .render(area, buf);
         } else {
             Paragraph::new(text2)
@@ -186,4 +205,3 @@ impl GameLogic {
                 .render(area, buf);
         }
     }
-}
