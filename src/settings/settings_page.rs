@@ -117,7 +117,7 @@ impl SettingsItem {
 impl SettingsStateList {
     pub fn render(&mut self, area: Rect, buf: &mut Buffer) {
         let instructions = Title::from(Line::from(vec![
-            " (Esc) quit | (↑/k) move up | (↓/j) move down | (→/l) toggle increase | (←/h) toggle decrease ".into(),
+            " quit: <esc> | down: ↓ or j | up: ↑ or k | toggle increase: → or l | toggle decrease: ← or h ".into(),
         ]));
 
         let block = Block::default()
