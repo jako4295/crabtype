@@ -2,11 +2,12 @@ use confy;
 static APP_NAME: &str = "crabtype";
 static CONFIG_NAME: &str = "config";
 
-#[derive(Debug, serde_derive::Serialize, serde_derive::Deserialize)]
+#[derive(Debug, serde_derive::Serialize, serde_derive::Deserialize, Clone, Copy)]
 pub struct Settings {
     pub total_time_sec: u8,
     pub history_length: u8,
     pub future_length: u8,
+    pub lower_case_letters: bool,
     pub capital_letters: bool,
     pub numbers: bool,
     pub parenthesis: bool,
@@ -24,6 +25,7 @@ impl Default for Settings {
             total_time_sec: 30,
             history_length: 3,
             future_length: 3,
+            lower_case_letters: true,
             capital_letters: false,
             numbers: false,
             parenthesis: false,

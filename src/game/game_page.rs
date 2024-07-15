@@ -1,5 +1,5 @@
 use crate::char_lib::load_chars;
-use crate::settings::settings_struct;
+use crate::settings::settings_struct::Settings;
 use chrono::{DateTime, Duration, Local};
 use dict::{Dict, DictIface};
 
@@ -10,11 +10,11 @@ use ratatui::{
     widgets::{block::*, *},
 };
 
-pub fn get_dict() -> Dict<bool> {
+pub fn get_dict(set: Settings) -> Dict<bool> {
     let mut dict: Dict<bool> = Dict::<bool>::new();
-    dict.add("letters".to_string(), true);
-    dict.add("cap_letters".to_string(), false);
-    dict.add("numbers".to_string(), false);
+    dict.add("letters".to_string(), set.lower_case_letters);
+    dict.add("cap_letters".to_string(), set.capital_letters);
+    dict.add("numbers".to_string(), set.numbers);
     dict
 }
 
@@ -32,15 +32,15 @@ pub struct GameLogic {
     pub char_hist: Vec<char>,
     pub char_future: Vec<char>,
     pub correct_hist: Vec<bool>,
-    pub settings: settings_struct::Settings,
+    pub settings: Settings,
 }
 
 impl Default for GameLogic {
     fn default() -> GameLogic {
-        let dict: Dict<bool> = get_dict();
+        let loaded_settings = Settings::read_config().unwrap();
+        let dict: Dict<bool> = get_dict(loaded_settings);
         let start_t = Local::now();
         let load_char: Vec<char> = load_chars::load_files_to_vec(dict);
-        let loaded_settings = settings_struct::Settings::read_config().unwrap();
         let mut h_vec = vec![];
         let mut f_vec = vec![];
         let mut c_hist = vec![];

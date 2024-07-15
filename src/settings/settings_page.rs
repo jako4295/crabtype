@@ -52,6 +52,11 @@ impl Default for SettingsStateList {
                 reference_name: "future_length".to_string(),
             },
             SettingsItem {
+                description: "Include lower case Letters".to_string(),
+                status: SettingsStatus::Boolean(settings.lower_case_letters),
+                reference_name: "lower_case_letters".to_string(),
+            },
+            SettingsItem {
                 description: "Include capital Letters".to_string(),
                 status: SettingsStatus::Boolean(settings.capital_letters),
                 reference_name: "capital_letters".to_string(),
@@ -235,6 +240,11 @@ impl SettingsStateList {
                 "future_length" => {
                     if let SettingsStatus::Uint(val) = item.status {
                         settings.future_length = val;
+                    }
+                }
+                "lower_case_letters" => {
+                    if let SettingsStatus::Boolean(val) = item.status {
+                        settings.lower_case_letters = val;
                     }
                 }
                 "capital_letters" => {
