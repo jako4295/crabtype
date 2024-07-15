@@ -31,7 +31,7 @@ pub struct GameLogic {
     pub future_amount: u8,
     pub char_hist: Vec<char>,
     pub char_future: Vec<char>,
-    pub correct: bool,
+    pub correct_hist: Vec<bool>,
     pub settings: settings_struct::Settings,
 }
 
@@ -43,10 +43,12 @@ impl Default for GameLogic {
         let loaded_settings = settings_struct::Settings::read_config().unwrap();
         let mut h_vec = vec![];
         let mut f_vec = vec![];
+        let mut c_hist = vec![];
         let h_amount: u8 = loaded_settings.history_length;
         let f_amount: u8 = loaded_settings.future_length;
         for _ in 0..h_amount {
             Vec::push(&mut h_vec, ' ');
+            Vec::push(&mut c_hist, false);
         }
         for _ in 0..f_amount {
             f_vec.push(load_chars::chose_random(load_char.to_owned()));
@@ -64,7 +66,7 @@ impl Default for GameLogic {
             future_amount: f_amount,
             char_hist: h_vec,
             char_future: f_vec,
-            correct: true,
+            correct_hist: c_hist,
             settings: loaded_settings,
         }
     }
@@ -78,6 +80,7 @@ impl GameLogic {
     pub fn reset_char_vec(&mut self) {
         self.char_future = vec![];
         self.char_hist = vec![];
+        self.correct_hist = vec![];
 
         let hist_loop = if self.hist_amount == 0 {
             1
@@ -92,6 +95,7 @@ impl GameLogic {
 
         for _ in 0..hist_loop {
             self.char_hist.push(' ');
+            self.correct_hist.push(false);
         }
         for _ in 0..future_loop {
             self.char_future
@@ -117,10 +121,21 @@ impl GameLogic {
             self.char_future.remove(0);
             self.char_future
                 .push(load_chars::chose_random(self.char_vec.to_owned()));
+
+            self.correct_hist.remove(0);
+            self.correct_hist.push(true);
             self.score += 1;
-            self.correct = true;
         } else {
-            self.correct = false;
+            self.correct_hist.remove(0);
+            self.correct_hist.push(false);
+        }
+    }
+
+    pub fn color_returner(&self, boolean: bool) -> Color {
+        if boolean {
+            Color::Rgb(66, 190, 66)
+        } else {
+            Color::Rgb(190, 66, 66)
         }
     }
 
@@ -159,10 +174,10 @@ impl GameLogic {
         }
 
         if self.hist_amount != 0 {
-            for i in self.char_hist.clone() {
+            for (i, _char) in self.char_hist.clone().iter().enumerate() {
                 letter_line.push(Span::styled(
-                    i.to_string(),
-                    Style::new().fg(Color::Rgb(128, 128, 128)),
+                    _char.to_string(),
+                    Style::new().fg(self.color_returner(self.correct_hist[i])),
                 ));
                 letter_line.push(Span::from(" "));
             }
