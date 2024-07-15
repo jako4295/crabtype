@@ -1,7 +1,6 @@
 use std::rc::Rc;
-
 use crate::char_lib::{load_chars, translator};
-use crate::settings::settings_struct;
+use crate::settings::settings_struct::Settings;
 use chrono::{DateTime, Duration, Local};
 use dict::{Dict, DictIface};
 
