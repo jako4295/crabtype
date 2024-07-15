@@ -14,7 +14,7 @@ pub struct App<'a> {
     exit: bool,
     // app state:
     state: &'a str,
-    gamestruct: game_page::GameLogic,
+    gamestruct: RefCell<game_page::GameLogic>,
     settings_select: RefCell<settings_page::SettingsStateList>,
 }
 
@@ -35,7 +35,7 @@ impl<'a> App<'a> {
             }
 
             if last_tick.elapsed() >= tick_rate {
-                self.gamestruct.get_time(); // Update the game timer
+                self.gamestruct.borrow_mut().get_time(); // Update the game timer
                 last_tick = Instant::now();
                 terminal.draw(|frame| self.render_frame(frame))?;
             }
@@ -70,8 +70,8 @@ impl<'a> App<'a> {
                 }
                 KeyCode::Char('b') => {
                     self.state = "game";
-                    self.gamestruct = game_page::GameLogic::default();
-                    self.gamestruct.reset();
+                    self.gamestruct = game_page::GameLogic::default().into();
+                    self.gamestruct.borrow_mut().reset();
                 }
                 _ => {}
             }
@@ -95,13 +95,13 @@ impl<'a> App<'a> {
 
         // Game:
         } else if self.state == "game" {
-            self.gamestruct.get_time();
+            self.gamestruct.borrow_mut().get_time();
             match key_event.code {
                 KeyCode::Esc => {
                     self.state = "menu";
                 }
-                KeyCode::Char(' ') => self.gamestruct.reset(),
-                KeyCode::Char(code) => self.gamestruct.compare_pressed_char(code),
+                KeyCode::Char(' ') => self.gamestruct.borrow_mut().reset(),
+                KeyCode::Char(code) => self.gamestruct.borrow_mut().compare_pressed_char(code),
                 _ => {}
             }
         } else {
@@ -122,7 +122,7 @@ impl Widget for &App<'_> {
                 self.settings_select.borrow_mut().render(area, buf);
             }
             "game" => {
-                self.gamestruct.render(area, buf);
+                self.gamestruct.borrow_mut().render(area, buf);
             }
             _ => {}
         }
