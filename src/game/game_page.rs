@@ -31,7 +31,7 @@ pub struct GameLogic {
     pub future_amount: u8,
     pub char_hist: Vec<char>,
     pub char_future: Vec<char>,
-    pub correct: bool,
+    pub correct_hist: Vec<bool>,
     pub settings: settings_struct::Settings,
 }
 
@@ -43,10 +43,12 @@ impl Default for GameLogic {
         let loaded_settings = settings_struct::Settings::read_config().unwrap();
         let mut h_vec = vec![];
         let mut f_vec = vec![];
+        let mut c_hist = vec![];
         let h_amount: u8 = loaded_settings.history_length;
         let f_amount: u8 = loaded_settings.future_length;
         for _ in 0..h_amount {
             Vec::push(&mut h_vec, ' ');
+            Vec::push(&mut c_hist, false);
         }
         for _ in 0..f_amount {
             f_vec.push(load_chars::chose_random(load_char.to_owned()));
@@ -64,7 +66,7 @@ impl Default for GameLogic {
             future_amount: f_amount,
             char_hist: h_vec,
             char_future: f_vec,
-            correct: true,
+            correct_hist: c_hist,
             settings: loaded_settings,
         }
     }
@@ -78,6 +80,7 @@ impl GameLogic {
     pub fn reset_char_vec(&mut self) {
         self.char_future = vec![];
         self.char_hist = vec![];
+        self.correct_hist = vec![];
 
         let hist_loop = if self.hist_amount == 0 {
             1
@@ -92,6 +95,7 @@ impl GameLogic {
 
         for _ in 0..hist_loop {
             self.char_hist.push(' ');
+            self.correct_hist.push(false);
         }
         for _ in 0..future_loop {
             self.char_future
@@ -106,25 +110,36 @@ impl GameLogic {
     }
 
     pub fn compare_pressed_char(&mut self, character: char) {
+        if !self.play {
+            return;
+        }
         self.char_hist.remove(0);
         self.char_hist.push(character);
 
-        if self.time >= Duration::seconds(self.settings.total_time_sec.into()) {
-            self.play = false
-        }
         if self.random_char == character {
             self.random_char = self.char_future[0];
             self.char_future.remove(0);
             self.char_future
                 .push(load_chars::chose_random(self.char_vec.to_owned()));
+
+            self.correct_hist.remove(0);
+            self.correct_hist.push(true);
             self.score += 1;
-            self.correct = true;
         } else {
-            self.correct = false;
+            self.correct_hist.remove(0);
+            self.correct_hist.push(false);
         }
     }
 
-    pub fn render(&self, area: Rect, buf: &mut Buffer) {
+    pub fn color_returner(&self, boolean: bool) -> Color {
+        if boolean {
+            Color::Rgb(66, 190, 66)
+        } else {
+            Color::Rgb(190, 66, 66)
+        }
+    }
+
+    pub fn render(&mut self, area: Rect, buf: &mut Buffer) {
         let title = Title::from(" CrabType ".bold());
         let instructions = Title::from(Line::from(vec![" quit: <esc> | restart: <space> ".into()]));
         let block = Block::default()
@@ -138,6 +153,18 @@ impl GameLogic {
             .style(Style::default().fg(Color::Yellow).bg(Color::Black))
             .border_set(border::THICK);
 
+        if self.time >= Duration::seconds(self.settings.total_time_sec.into()) {
+            self.play = false
+        }
+
+        if self.play {
+            self.render_game(area, buf, block);
+        } else {
+            self.render_result(area, buf, block);
+        }
+    }
+
+    pub fn render_game(&self, area: Rect, buf: &mut Buffer, block: Block) {
         let mut letter_line = vec![];
 
         if self.hist_amount < self.future_amount {
@@ -147,10 +174,10 @@ impl GameLogic {
         }
 
         if self.hist_amount != 0 {
-            for i in self.char_hist.clone() {
+            for (i, _char) in self.char_hist.clone().iter().enumerate() {
                 letter_line.push(Span::styled(
-                    i.to_string(),
-                    Style::new().fg(Color::Rgb(128, 128, 128)),
+                    _char.to_string(),
+                    Style::new().fg(self.color_returner(self.correct_hist[i])),
                 ));
                 letter_line.push(Span::from(" "));
             }
@@ -176,33 +203,30 @@ impl GameLogic {
         }
 
         let text = vec![
-            text::Line::from(vec![
-                Span::from("Timer: "),
-                Span::from(self.time.num_seconds().to_string()),
-                Span::from("sec / "),
-                Span::from(self.settings.total_time_sec.to_string()),
-                Span::from(" sec"),
-            ]),
+            text::Line::from(vec![Span::from(
+                (i64::from(self.settings.total_time_sec) - self.time.num_seconds()).to_string(),
+            )]),
             text::Line::from(" "),
             text::Line::from(vec![Span::from("Value: ")]),
             text::Line::from(letter_line),
         ];
+
+        Paragraph::new(text)
+            .centered()
+            .block(block)
+            .fg(Color::White)
+            .render(area, buf);
+    }
+
+    pub fn render_result(&self, area: Rect, buf: &mut Buffer, block: Block) {
         let text2 = vec![
             text::Line::from(vec![Span::from("You score is: ")]),
             text::Line::from(" "),
             text::Line::from(vec![Span::from(self.score.to_string())]),
         ];
-        if self.play {
-            Paragraph::new(text)
-                .centered()
-                .block(block)
-                .fg(Color::White)
-                .render(area, buf);
-        } else {
-            Paragraph::new(text2)
-                .centered()
-                .block(block)
-                .render(area, buf);
-        }
+        Paragraph::new(text2)
+            .centered()
+            .block(block)
+            .render(area, buf);
     }
 }
