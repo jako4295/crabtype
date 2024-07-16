@@ -72,6 +72,11 @@ impl Default for SettingsStateList {
                 reference_name: "parenthesis".to_string(),
             },
             SettingsItem {
+                description: "Included special characters".to_string(),
+                status: SettingsStatus::Boolean(settings.special_characters),
+                reference_name: "special_characters".to_string(),
+            },
+            SettingsItem {
                 description: "Indicate for 10 finger typing".to_string(),
                 status: SettingsStatus::Boolean(settings.ten_finger_typing),
                 reference_name: "ten_finger_typing".to_string(),

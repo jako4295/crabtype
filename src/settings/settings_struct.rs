@@ -11,6 +11,7 @@ pub struct Settings {
     pub capital_letters: bool,
     pub numbers: bool,
     pub parenthesis: bool,
+    pub special_characters: bool,
     pub ten_finger_typing: bool,
 
     // TODO: remove time aspect and create stay alive mode.
@@ -29,6 +30,7 @@ impl Default for Settings {
             capital_letters: false,
             numbers: false,
             parenthesis: false,
+            special_characters: false,
             ten_finger_typing: false,
             // TODO: remove time aspect and create stay alive mode.
             // Should exit game if character/minute is too slow or

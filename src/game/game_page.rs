@@ -15,6 +15,8 @@ pub fn get_dict(set: Settings) -> Dict<bool> {
     dict.add("letters".to_string(), set.lower_case_letters);
     dict.add("cap_letters".to_string(), set.capital_letters);
     dict.add("numbers".to_string(), set.numbers);
+    dict.add("parenthesis".to_string(), set.parenthesis);
+    dict.add("special_characters".to_string(), set.special_characters);
     dict
 }
 
