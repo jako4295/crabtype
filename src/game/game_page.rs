@@ -178,7 +178,7 @@ impl GameLogic {
         }
 
         Paragraph::new(vec![
-            text::Line::from(" "),
+            text::Line::from(" CrabType ".bold()),
             text::Line::from(" "),
             text::Line::from(" "),
             text::Line::from(timer),
