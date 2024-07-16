@@ -1,5 +1,7 @@
-use crate::char_lib::load_chars;
-use crate::settings::settings_struct::Settings;
+use std::rc::Rc;
+
+use crate::char_lib::{load_chars, translator};
+use crate::settings::settings_struct;
 use chrono::{DateTime, Duration, Local};
 use dict::{Dict, DictIface};
 
@@ -167,57 +169,82 @@ impl GameLogic {
     }
 
     pub fn render_game(&self, area: Rect, buf: &mut Buffer, block: Block) {
-        let mut letter_line = vec![];
+        let (timer_layout, letter_line_layout) = self.split_game_layout(area);
+        Paragraph::new("").block(block).render(area, buf);
 
-        if self.hist_amount < self.future_amount {
-            for _ in 0..(self.future_amount - self.hist_amount) {
-                letter_line.push(Span::from("  "))
-            }
+        // Timer paragraph
+        let timer = (i64::from(self.settings.total_time_sec) - self.time.num_seconds()).to_string();
+        let mut _ascii_time = "".to_string();
+        for _char in timer.chars() {
+            _ascii_time += translator::translator(&_char.to_string());
         }
 
+        Paragraph::new(vec![
+            text::Line::from(" "),
+            text::Line::from(" "),
+            text::Line::from(" "),
+            text::Line::from(timer),
+        ])
+        .centered()
+        .block(Block::new())
+        .render(timer_layout, buf);
+
+        // History paragraph
+        let mut hist_line = vec![];
         if self.hist_amount != 0 {
             for (i, _char) in self.char_hist.clone().iter().enumerate() {
-                letter_line.push(Span::styled(
+                if _char.eq(&' ') {
+                    continue;
+                }
+                hist_line.push(Span::styled(
                     _char.to_string(),
                     Style::new().fg(self.color_returner(self.correct_hist[i])),
                 ));
-                letter_line.push(Span::from(" "));
+                hist_line.push(Span::from(" "));
             }
         }
-        letter_line.push(Span::from("  "));
-        letter_line.push(self.random_char.to_string().yellow());
-        letter_line.push(Span::from("  "));
+        Paragraph::new(vec![
+            text::Line::from(" "),
+            text::Line::from(" "),
+            text::Line::from(" "),
+            text::Line::from(" "),
+            text::Line::from(hist_line),
+        ])
+        .wrap(Wrap { trim: true })
+        .right_aligned()
+        .block(Block::new())
+        .render(letter_line_layout[0], buf);
 
+        // Word to guess paragraph
+        let word_to_type = self.random_char.to_string();
+        let _ascii_word = translator::translator(&word_to_type);
+        Paragraph::new(_ascii_word.to_string())
+            .centered()
+            .block(Block::new())
+            .render(letter_line_layout[1], buf);
+
+        // Future Paragraph
+        let mut future_line = vec![];
         if self.future_amount != 0 {
             for u in self.char_future.clone() {
-                letter_line.push(Span::from(" "));
-                letter_line.push(Span::styled(
+                future_line.push(Span::from(" "));
+                future_line.push(Span::styled(
                     u.to_string(),
                     Style::new().fg(Color::Rgb(128, 128, 128)),
                 ));
             }
         }
-
-        if self.hist_amount > self.future_amount {
-            for _ in 0..(self.hist_amount - self.future_amount) {
-                letter_line.push(Span::from("  "))
-            }
-        }
-
-        let text = vec![
-            text::Line::from(vec![Span::from(
-                (i64::from(self.settings.total_time_sec) - self.time.num_seconds()).to_string(),
-            )]),
+        Paragraph::new(vec![
             text::Line::from(" "),
-            text::Line::from(vec![Span::from("Value: ")]),
-            text::Line::from(letter_line),
-        ];
-
-        Paragraph::new(text)
-            .centered()
-            .block(block)
-            .fg(Color::White)
-            .render(area, buf);
+            text::Line::from(" "),
+            text::Line::from(" "),
+            text::Line::from(" "),
+            text::Line::from(future_line),
+        ])
+        .wrap(Wrap { trim: true })
+        .left_aligned()
+        .block(Block::new())
+        .render(letter_line_layout[2], buf);
     }
 
     pub fn render_result(&self, area: Rect, buf: &mut Buffer, block: Block) {
@@ -230,5 +257,30 @@ impl GameLogic {
             .centered()
             .block(block)
             .render(area, buf);
+    }
+
+    fn split_game_layout(&self, area: Rect) -> (Rect, Rc<[Rect]>) {
+        // split game in:
+        // +---------------------------------+
+        // |              Timer              |
+        // +---------+--------------+--------+
+        // | History | Word to type | Future |
+        // +---------------------------------+
+
+        let outer_layout = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints(vec![Constraint::Percentage(10), Constraint::Percentage(90)])
+            .split(area);
+
+        let inner_layout = Layout::default()
+            .direction(Direction::Horizontal)
+            .constraints(vec![
+                Constraint::Percentage(40),
+                Constraint::Percentage(20),
+                Constraint::Percentage(40),
+            ])
+            .split(outer_layout[1]);
+
+        (outer_layout[0], inner_layout)
     }
 }
