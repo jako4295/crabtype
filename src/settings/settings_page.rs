@@ -52,6 +52,11 @@ impl Default for SettingsStateList {
                 reference_name: "future_length".to_string(),
             },
             SettingsItem {
+                description: "Use Large Characters".to_string(),
+                status: SettingsStatus::Boolean(settings.large_char),
+                reference_name: "large_char".to_string(),
+            },
+            SettingsItem {
                 description: "Include lower case Letters".to_string(),
                 status: SettingsStatus::Boolean(settings.lower_case_letters),
                 reference_name: "lower_case_letters".to_string(),
@@ -76,16 +81,16 @@ impl Default for SettingsStateList {
                 status: SettingsStatus::Boolean(settings.special_characters),
                 reference_name: "special_characters".to_string(),
             },
-            SettingsItem {
-                description: "Indicate for 10 finger typing".to_string(),
-                status: SettingsStatus::Boolean(settings.ten_finger_typing),
-                reference_name: "ten_finger_typing".to_string(),
-            },
-            SettingsItem {
-                description: "Hardcore mode".to_string(),
-                status: SettingsStatus::Boolean(settings.hardcore),
-                reference_name: "hardcore".to_string(),
-            },
+            // SettingsItem {
+            //     description: "Indicate for 10 finger typing".to_string(),
+            //     status: SettingsStatus::Boolean(settings.ten_finger_typing),
+            //     reference_name: "ten_finger_typing".to_string(),
+            // },
+            // SettingsItem {
+            //     description: "Hardcore mode".to_string(),
+            //     status: SettingsStatus::Boolean(settings.hardcore),
+            //     reference_name: "hardcore".to_string(),
+            // },
         ];
 
         let mut _state = TableState::default();
@@ -245,6 +250,11 @@ impl SettingsStateList {
                 "future_length" => {
                     if let SettingsStatus::Uint(val) = item.status {
                         settings.future_length = val;
+                    }
+                }
+                "large_char" => {
+                    if let SettingsStatus::Boolean(val) = item.status {
+                        settings.large_char = val;
                     }
                 }
                 "lower_case_letters" => {

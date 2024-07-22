@@ -202,13 +202,21 @@ impl GameLogic {
                 hist_line.push(Span::from(" "));
             }
         }
-        Paragraph::new(vec![
-            text::Line::from(" "),
-            text::Line::from(" "),
-            text::Line::from(" "),
-            text::Line::from(" "),
-            text::Line::from(hist_line),
-        ])
+        let mut v_hist = vec![];
+        if self.settings.large_char{
+            for _ in 0..3{
+                v_hist.push(text::Line::from(" "))
+            }
+        }
+        v_hist.push(text::Line::from(hist_line));
+        Paragraph::new(v_hist)
+        //     vec![
+        //     text::Line::from(" "),
+        //     text::Line::from(" "),
+        //     text::Line::from(" "),
+        //     text::Line::from(" "),
+        //     text::Line::from(hist_line),
+        // ])
         .wrap(Wrap { trim: true })
         .right_aligned()
         .block(Block::new())
@@ -216,8 +224,14 @@ impl GameLogic {
 
         // Word to guess paragraph
         let word_to_type = self.random_char.to_string();
-        let _ascii_word = translator::translator(&word_to_type);
-        Paragraph::new(_ascii_word.to_string())
+        let mut _ascii_word: String = "".to_string();
+        if self.settings.large_char{
+            _ascii_word = translator::translator(&word_to_type).to_string();
+        }
+        else{
+            _ascii_word = word_to_type;
+        }
+        Paragraph::new(_ascii_word)
             .centered()
             .block(Block::new())
             .render(letter_line_layout[1], buf);
@@ -233,13 +247,21 @@ impl GameLogic {
                 ));
             }
         }
-        Paragraph::new(vec![
-            text::Line::from(" "),
-            text::Line::from(" "),
-            text::Line::from(" "),
-            text::Line::from(" "),
-            text::Line::from(future_line),
-        ])
+        let mut v_future = vec![];
+        if self.settings.large_char{
+            for _ in 0..3{
+                v_future.push(text::Line::from(" "))
+            }
+        }
+        v_future.push(text::Line::from(future_line));
+        Paragraph::new(v_future)
+        //     vec![
+        //     text::Line::from(" "),
+        //     text::Line::from(" "),
+        //     text::Line::from(" "),
+        //     text::Line::from(" "),
+        //     text::Line::from(future_line),
+        // ])
         .wrap(Wrap { trim: true })
         .left_aligned()
         .block(Block::new())
