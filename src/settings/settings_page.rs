@@ -78,6 +78,11 @@ impl Default for SettingsStateList {
             },
             SettingsItem {
                 description: "Included special characters".to_string(),
+                status: SettingsStatus::Boolean(settings.parenthesis),
+                reference_name: "special_characters".to_string(),
+            },
+            SettingsItem {
+                description: "Included special characters".to_string(),
                 status: SettingsStatus::Boolean(settings.special_characters),
                 reference_name: "special_characters".to_string(),
             },
@@ -275,6 +280,11 @@ impl SettingsStateList {
                 "parenthesis" => {
                     if let SettingsStatus::Boolean(val) = item.status {
                         settings.parenthesis = val;
+                    }
+                }
+                "special_characters" => {
+                    if let SettingsStatus::Boolean(val) = item.status {
+                        settings.special_characters = val;
                     }
                 }
                 "ten_finger_typing" => {
