@@ -1,6 +1,8 @@
 use std::rc::Rc;
+
 use crate::char_lib::{load_chars, translator};
 use crate::settings::settings_struct::Settings;
+
 use chrono::{DateTime, Duration, Local};
 use dict::{Dict, DictIface};
 
@@ -200,6 +202,7 @@ impl GameLogic {
                     Style::new().fg(self.color_returner(self.correct_hist[i])),
                 ));
                 hist_line.push(Span::from(" "));
+
             }
         }
         let mut v_hist = vec![];
@@ -210,17 +213,12 @@ impl GameLogic {
         }
         v_hist.push(text::Line::from(hist_line));
         Paragraph::new(v_hist)
-        //     vec![
-        //     text::Line::from(" "),
-        //     text::Line::from(" "),
-        //     text::Line::from(" "),
-        //     text::Line::from(" "),
-        //     text::Line::from(hist_line),
-        // ])
+
         .wrap(Wrap { trim: true })
         .right_aligned()
         .block(Block::new())
         .render(letter_line_layout[0], buf);
+
 
         // Word to guess paragraph
         let word_to_type = self.random_char.to_string();
@@ -247,6 +245,7 @@ impl GameLogic {
                 ));
             }
         }
+
         let mut v_future = vec![];
         if self.settings.large_char{
             for _ in 0..3{
@@ -255,13 +254,7 @@ impl GameLogic {
         }
         v_future.push(text::Line::from(future_line));
         Paragraph::new(v_future)
-        //     vec![
-        //     text::Line::from(" "),
-        //     text::Line::from(" "),
-        //     text::Line::from(" "),
-        //     text::Line::from(" "),
-        //     text::Line::from(future_line),
-        // ])
+
         .wrap(Wrap { trim: true })
         .left_aligned()
         .block(Block::new())
