@@ -31,7 +31,6 @@ pub struct GameLogic {
     pub char_vec: Vec<char>,
     pub score: u32,
     pub play: bool,
-    pub current_char: Option<char>,
     pub hist_amount: u8,
     pub future_amount: u8,
     pub char_hist: Vec<char>,
@@ -42,7 +41,10 @@ pub struct GameLogic {
 
 impl Default for GameLogic {
     fn default() -> GameLogic {
-        let loaded_settings = Settings::read_config().unwrap();
+        let mut loaded_settings = Settings::read_config().unwrap();
+        if !loaded_settings.lower_case_letters && !loaded_settings.capital_letters && !loaded_settings.numbers && !loaded_settings.parenthesis && !loaded_settings.special_characters {
+            loaded_settings.lower_case_letters = true
+        }
         let dict: Dict<bool> = get_dict(loaded_settings);
         let start_t = Local::now();
         let load_char: Vec<char> = load_chars::load_files_to_vec(dict);
@@ -66,7 +68,6 @@ impl Default for GameLogic {
             char_vec: load_char.to_owned(),
             score: 0,
             play: true,
-            current_char: None,
             hist_amount: h_amount,
             future_amount: f_amount,
             char_hist: h_vec,
