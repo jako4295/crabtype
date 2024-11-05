@@ -2,14 +2,17 @@ use confy;
 static APP_NAME: &str = "crabtype";
 static CONFIG_NAME: &str = "config";
 
-#[derive(Debug, serde_derive::Serialize, serde_derive::Deserialize)]
+#[derive(Debug, serde_derive::Serialize, serde_derive::Deserialize, Clone, Copy)]
 pub struct Settings {
     pub total_time_sec: u8,
     pub history_length: u8,
     pub future_length: u8,
+    pub large_char: bool,
+    pub lower_case_letters: bool,
     pub capital_letters: bool,
     pub numbers: bool,
     pub parenthesis: bool,
+    pub special_characters: bool,
     pub ten_finger_typing: bool,
 
     // TODO: remove time aspect and create stay alive mode.
@@ -24,9 +27,12 @@ impl Default for Settings {
             total_time_sec: 30,
             history_length: 3,
             future_length: 3,
+            large_char: true,
+            lower_case_letters: true,
             capital_letters: false,
             numbers: false,
             parenthesis: false,
+            special_characters: false,
             ten_finger_typing: false,
             // TODO: remove time aspect and create stay alive mode.
             // Should exit game if character/minute is too slow or

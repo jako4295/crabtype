@@ -1,7 +1,8 @@
 use std::rc::Rc;
 
 use crate::char_lib::{load_chars, translator};
-use crate::settings::settings_struct;
+use crate::settings::settings_struct::Settings;
+
 use chrono::{DateTime, Duration, Local};
 use dict::{Dict, DictIface};
 
@@ -12,11 +13,13 @@ use ratatui::{
     widgets::{block::*, *},
 };
 
-pub fn get_dict() -> Dict<bool> {
+pub fn get_dict(set: Settings) -> Dict<bool> {
     let mut dict: Dict<bool> = Dict::<bool>::new();
-    dict.add("letters".to_string(), true);
-    dict.add("cap_letters".to_string(), false);
-    dict.add("numbers".to_string(), false);
+    dict.add("letters".to_string(), set.lower_case_letters);
+    dict.add("cap_letters".to_string(), set.capital_letters);
+    dict.add("numbers".to_string(), set.numbers);
+    dict.add("parenthesis".to_string(), set.parenthesis);
+    dict.add("special_characters".to_string(), set.special_characters);
     dict
 }
 
@@ -28,21 +31,23 @@ pub struct GameLogic {
     pub char_vec: Vec<char>,
     pub score: u32,
     pub play: bool,
-    pub current_char: Option<char>,
     pub hist_amount: u8,
     pub future_amount: u8,
     pub char_hist: Vec<char>,
     pub char_future: Vec<char>,
     pub correct_hist: Vec<bool>,
-    pub settings: settings_struct::Settings,
+    pub settings: Settings,
 }
 
 impl Default for GameLogic {
     fn default() -> GameLogic {
-        let dict: Dict<bool> = get_dict();
+        let mut loaded_settings = Settings::read_config().unwrap();
+        if !loaded_settings.lower_case_letters && !loaded_settings.capital_letters && !loaded_settings.numbers && !loaded_settings.parenthesis && !loaded_settings.special_characters {
+            loaded_settings.lower_case_letters = true
+        }
+        let dict: Dict<bool> = get_dict(loaded_settings);
         let start_t = Local::now();
         let load_char: Vec<char> = load_chars::load_files_to_vec(dict);
-        let loaded_settings = settings_struct::Settings::read_config().unwrap();
         let mut h_vec = vec![];
         let mut f_vec = vec![];
         let mut c_hist = vec![];
@@ -63,7 +68,6 @@ impl Default for GameLogic {
             char_vec: load_char.to_owned(),
             score: 0,
             play: true,
-            current_char: None,
             hist_amount: h_amount,
             future_amount: f_amount,
             char_hist: h_vec,
@@ -199,24 +203,34 @@ impl GameLogic {
                     Style::new().fg(self.color_returner(self.correct_hist[i])),
                 ));
                 hist_line.push(Span::from(" "));
+
             }
         }
-        Paragraph::new(vec![
-            text::Line::from(" "),
-            text::Line::from(" "),
-            text::Line::from(" "),
-            text::Line::from(" "),
-            text::Line::from(hist_line),
-        ])
+        let mut v_hist = vec![];
+        if self.settings.large_char{
+            for _ in 0..3{
+                v_hist.push(text::Line::from(" "))
+            }
+        }
+        v_hist.push(text::Line::from(hist_line));
+        Paragraph::new(v_hist)
+
         .wrap(Wrap { trim: true })
         .right_aligned()
         .block(Block::new())
         .render(letter_line_layout[0], buf);
 
+
         // Word to guess paragraph
         let word_to_type = self.random_char.to_string();
-        let _ascii_word = translator::translator(&word_to_type);
-        Paragraph::new(_ascii_word.to_string())
+        let mut _ascii_word: String = "".to_string();
+        if self.settings.large_char{
+            _ascii_word = translator::translator(&word_to_type).to_string();
+        }
+        else{
+            _ascii_word = word_to_type;
+        }
+        Paragraph::new(_ascii_word)
             .centered()
             .block(Block::new())
             .render(letter_line_layout[1], buf);
@@ -232,13 +246,16 @@ impl GameLogic {
                 ));
             }
         }
-        Paragraph::new(vec![
-            text::Line::from(" "),
-            text::Line::from(" "),
-            text::Line::from(" "),
-            text::Line::from(" "),
-            text::Line::from(future_line),
-        ])
+
+        let mut v_future = vec![];
+        if self.settings.large_char{
+            for _ in 0..3{
+                v_future.push(text::Line::from(" "))
+            }
+        }
+        v_future.push(text::Line::from(future_line));
+        Paragraph::new(v_future)
+
         .wrap(Wrap { trim: true })
         .left_aligned()
         .block(Block::new())
